@@ -1,4 +1,0 @@
-$: -739837926
-BuildCommand: build.sh
-RunCommand: run.sh
-Product: build/Release-iphoneos/demo-app.app/demo-app

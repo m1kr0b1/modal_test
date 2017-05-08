@@ -3,8 +3,8 @@
 		var Observable = require("FuseJS/Observable");
         var GeoLocation = require("FuseJS/GeoLocation");
 
-        var hikes = [{"Title":"This is a hike", "Description":"It's a very good hike","LocalPhoto":"/Assets/screen2.png"}]
-        var trails = [{"Title":"This is a trail", "Description":"It's a very good trail","LocalPhoto":"/Assets/screen2.png", "Locations":[{"lat":"41.996075","lon":"21.431812"}]}]
+        var hikes = [{"Title":"This is a hike", "Description":"It's a very good hike","LocalPhoto":"Assets/screen2.png"}]
+        var trails = [{"Title":"This is a trail", "Description":"It's a very good trail","LocalPhoto":"Assets/screen2.png", "Locations":[{"lat":"41.996075","lon":"21.431812"}]}]
 
         // Immediate
 
@@ -58,7 +58,7 @@
 				var dist = distance(41.995876, 21.431812, observedLocation.value.latitude, observedLocation.value.longitude)
 				if ((dist < 50)){
 					// Display modal
-					isDialogShowing = true;
+					isDialogShowing.value = true;
 					console.log('check 1')
 					console.log(isDialogShowing);
 				}
@@ -69,18 +69,24 @@
 		var mapLocation = observedLocation;
 		var continuousLocation = observedLocation.map(JSON.stringify);
 
+		function testToggleBool() {
+			isDialogShowing.value = ! isDialogShowing.value;
+		}
+
 
         module.exports = {
             timeoutLocation: continuousLocation,
             mapLocation: mapLocation,
             hikes: hikes,
-            trails: trails
+            trails: trails,
+            isDialogShowing: isDialogShowing,
+            testToggleBool: testToggleBool
         };
 
     </JavaScript>
 
 
-	<Panel ux:Name="dialog" Alignment="VerticalCenter" Margin="40" Padding="20,40,20,0">
+	<Panel ux:Name="dialog" Alignment="VerticalCenter" Margin="40" Padding="20,40,20,0" Opacity="0">
 		<Rectangle Layer="Background" Fill="#fff" CornerRadius="2" Opacity=".8" />
 		<StackPanel>
 			<Text Alignment="Center" FontSize="30" TextWrapping="Wrap" TextAlignment="Center">Your playdate has been booked!</Text>
@@ -106,6 +112,9 @@
 			</Grid>
 			<Text ux:Name="titleText" Value="GEO TEST" Color="color0" FontSize="25" Alignment="Center">
 				<Font File="Assets/Fonts/Roboto-Black.ttf" />
+				<Clicked>
+					<Callback Handler="{testToggleBool}" />
+				</Clicked>
 			</Text>
 			<Image File="Assets/search.png" Color="color4" Width="30" Height="30" Margin="10"/>
 		</Grid>
@@ -220,15 +229,15 @@
 				<StackPanel>
 					<Panel Height="250">
 				        <NativeViewHost>
-				        	<Select Data="{mapLocation}">
-				            <MapView Latitude="41.9964600" Longitude="21.4314100" Zoom="10" ShowMyLocationButton="True" >
-				                <Each Items="{trails}">
-				                	<Each Items="{Locations}">
-				                		<MapMarker Latitude="{lat}" Longitude="{lon}" Label="{Title}"/>
-				                	</Each>
-				                </Each>
-				            </MapView>
-				        </Select>
+				        	<With Data="{mapLocation}">
+					            <MapView Latitude="41.9964600" Longitude="21.4314100" Zoom="10" ShowMyLocationButton="True" >
+					                <Each Items="{trails}">
+					                	<Each Items="{Locations}">
+					                		<MapMarker Latitude="{lat}" Longitude="{lon}" Label="{Title}"/>
+					                	</Each>
+					                </Each>
+					            </MapView>
+					        </With>
 				        </NativeViewHost>
 
 				</Panel>
