@@ -1,0 +1,29 @@
+{
+  "RootNamespace": "",
+  "Packages": [
+    "Fuse",
+    "FuseJS",
+    "Fuse.Maps",
+    "Fuse.GeoLocation"
+  ],
+  "Includes": [
+    "*",
+    "Modules/*.js:Bundle"
+  ],
+  "Projects": [
+    
+  ],
+  "Excludes": [
+    "fuse_modules/"
+  ],
+  "FusePM": {
+    "Dependencies": [
+      "https://github.com/bolav/fuse-sqlite"
+    ],
+  "Android": {
+     "Geo": {
+          "ApiKey": "qweqweqw"
+      }
+  }    
+  }
+}

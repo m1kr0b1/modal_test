@@ -1,0 +1,305 @@
+<App>
+<JavaScript>
+		var Observable = require("FuseJS/Observable");
+        var GeoLocation = require("FuseJS/GeoLocation");
+
+        var hikes = [{"Title":"This is a hike", "Description":"It's a very good hike","LocalPhoto":"/Assets/screen2.png"}]
+        var trails = [{"Title":"This is a trail", "Description":"It's a very good trail","LocalPhoto":"/Assets/screen2.png", "Locations":[{"lat":"41.996075","lon":"21.431812"}]}]
+
+        // Immediate
+
+        var Tours = Observable();
+        var timeoutLocation = Observable("");
+
+        var isDialogShowing = Observable(false);
+
+		function distance(lat1, lon1, lat2, lon2) 
+		{
+		  var R = 6371; // km
+		  var dLat = toRad(lat2-lat1);
+		  var dLon = toRad(lon2-lon1);
+		  var lat1 = toRad(lat1);
+		  var lat2 = toRad(lat2);
+
+		  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+		    Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+		  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		  var d = R * c;
+		  return d * 1000;
+		}
+
+		// Converts numeric degrees to radians
+		function toRad(Value) 
+		{
+		    return Value * Math.PI / 180;
+		}
+
+       function startContinuousListener() {
+            var intervalMs = 1000;
+            var desiredAccuracyInMeters = 10;
+            GeoLocation.startListening(intervalMs, desiredAccuracyInMeters);
+        }
+
+        function stopContinuousListener() {
+            GeoLocation.stopListening();
+        }
+
+        startContinuousListener()
+
+        var observedLocation = GeoLocation.observe("changed");
+        var mapLocation = observedLocation;
+
+		GeoLocation.on("error", function(err){console.log(err)});
+		GeoLocation.on("changed", function(loc){
+			
+			console.log(JSON.stringify(observedLocation))
+			
+			if (observedLocation.value){
+				var dist = distance(41.995876, 21.431812, observedLocation.value.latitude, observedLocation.value.longitude)
+				if ((dist < 50)){
+					// Display modal
+					isDialogShowing = true;
+					console.log('check 1')
+					console.log(isDialogShowing);
+				}
+			}
+		});
+
+
+		var mapLocation = observedLocation;
+		var continuousLocation = observedLocation.map(JSON.stringify);
+
+
+        module.exports = {
+            timeoutLocation: continuousLocation,
+            mapLocation: mapLocation,
+            hikes: hikes,
+            trails: trails
+        };
+
+    </JavaScript>
+
+
+	<Panel ux:Name="dialog" Alignment="VerticalCenter" Margin="40" Padding="20,40,20,0">
+		<Rectangle Layer="Background" Fill="#fff" CornerRadius="2" Opacity=".8" />
+		<StackPanel>
+			<Text Alignment="Center" FontSize="30" TextWrapping="Wrap" TextAlignment="Center">Your playdate has been booked!</Text>
+			<Button Text="Fantastic!" Margin="0,20,0,0" Padding="10,10,10,50" Clicked="{closeDialog}" HitTestMode="LocalBoundsAndChildren" />
+		</StackPanel>
+		<WhileFalse Value="{isDialogShowing}">
+			<Move X="3" RelativeTo="Size" Duration="0.6" Easing="BackIn" />
+			<Scale Factor="0.8" Duration=".6" Easing="BackIn" />
+		</WhileFalse>
+		<DropShadow />
+	</Panel>
+
+	<WhileTrue Value="{isDialogShowing}">
+		<Change dialog.Opacity="1" Duration=".3" Easing="QuadraticInOut" />
+	</WhileTrue>
+
+	<ClientPanel>
+		<Grid Columns="auto,1*,auto" Height="50" Dock="Top" Margin="5">
+			<Grid ColumnCount="2" RowCount="2" Width="22" Height="22" Margin="10">
+				<Each Count="4">
+					<Circle Color="color4" Margin="1.5"/>
+				</Each>
+			</Grid>
+			<Text ux:Name="titleText" Value="GEO TEST" Color="color0" FontSize="25" Alignment="Center">
+				<Font File="Assets/Fonts/Roboto-Black.ttf" />
+			</Text>
+			<Image File="Assets/search.png" Color="color4" Width="30" Height="30" Margin="10"/>
+		</Grid>
+
+		<Panel Dock="Top" Height="60" >
+			<Rectangle ux:Name="indicator" CornerRadius="30" Color="color0" LayoutMaster="p1" Margin="0,10" Width="100%" ZOffset="0.1"/>
+			<Grid ColumnCount="5" Margin="-30,0">
+				<Panel ux:Name="p1" Column="0" ColumnSpan="2"/>
+				<Panel ux:Name="p4" Column="3" ColumnSpan="2"/>
+			</Grid>
+
+			<Grid ZOffset="1" Margin="-20,0">
+				<Column ux:Name="col1" Width="1" WidthMetric="Proportion"/>
+				<Column ux:Name="col2" Width="1" WidthMetric="Proportion"/>
+				<Column ux:Name="col3" Width="1" WidthMetric="Proportion"/>
+				<Column ux:Name="col4" Width="1" WidthMetric="Proportion"/>
+
+				<Text ux:Class="TabHeader" Color="White" Alignment="CenterLeft" Opacity="0" Margin="20,0,0,0" MinWidth="100"/>
+				<Image ux:Class="TabIcon" Width="25" Height="25" />
+
+				<Panel HitTestMode="LocalBounds">
+					<Grid Columns="auto,1*" Margin="40,0" Alignment="Left">
+						<TabIcon ux:Name="c1" File="Assets/basket.png" Color="color0"/>
+						<TabHeader ux:Name="h1" Value="Hikes" />
+					</Grid>
+					<Clicked>
+						<Set nav.Active="page1" />
+					</Clicked>
+				</Panel>
+				<Panel HitTestMode="LocalBounds">
+					<Grid Columns="auto,1*" Margin="30,0" Alignment="Left">
+						<TabIcon ux:Name="c2" File="Assets/accountbalance.png" Color="color1"/>
+						<TabHeader ux:Name="h2" Value="Trails"/>
+					</Grid>
+					<Clicked>
+						<Set nav.Active="page2" />
+					</Clicked>
+				</Panel>
+				<Panel HitTestMode="LocalBounds">
+					<Grid Columns="auto,1*" Margin="30,0" Alignment="Left">
+						<TabIcon ux:Name="c3" File="Assets/play.png" Color="color2"/>
+						<TabHeader ux:Name="h3" Value="Information"/>
+
+					</Grid>
+					<Clicked>
+						<Set nav.Active="page3" />
+					</Clicked>
+				</Panel>
+				<Panel HitTestMode="LocalBounds">
+					<Grid Columns="auto,1*" Margin="30,0" Alignment="Left">
+						<TabIcon ux:Name="c4" File="Assets/person.png" Color="color3" />
+						<TabHeader ux:Name="h4" Value="Friends"/>
+					</Grid>
+					<Clicked>
+						<Set nav.Active="page4" />
+					</Clicked>
+				</Panel>
+			</Grid>
+		</Panel>
+		<PageControl ux:Name="nav">
+			<NavigationMotion GotoEasing="BackOut" />
+			<Attractor ux:Name="indicatorColorAttractor" Target="indicator.Color" Value="color0" />
+			<Rectangle ux:Name="bgColor" Layer="Background" Color="color0" Opacity="0.12"/>
+			<Attractor ux:Name="bgColorAttractor" Target="bgColor.Color" Value="color0" />
+			<Attractor ux:Name="titleTextAttractor" Target="titleText.Color" Value="color0" />
+
+			<WhileTrue ux:Name="shrinkIndicatorWidth">
+				<Change indicator.Width="90" Duration="0.25"/>
+			</WhileTrue>
+
+			<Image ux:Class="PagePlaceholder" Margin="8,10,8,0" StretchMode="UniformToFill" ContentAlignment="Top"/>
+
+			<Page ux:Name="page1">
+				
+		        <ScrollView>
+		            <Grid ColumnCount="1">
+		                
+	                    <Each Items="{hikes}">
+		                    <DockPanel Height="350" Margin="10,20">
+		                        <Rectangle Layer="Background" CornerRadius="10" Fill="#fff"  />
+		                        <Rectangle Height="200" Dock="Top" Margin="0,-10"  CornerRadius="10">
+		                        	<Image File="{LocalPhoto}" Height="230" Padding="30" StretchMode="Fill" /> 
+		                    	</Rectangle>
+		                    		<Clicked Handler="{locClick}" />
+								<Panel Margin="0,40" >
+		                            <Text Value="{Title}" TextAlignment="Left" Alignment="Left"  Margin="10,0" Padding="10" Dock="Top" FontSize="22" />
+		                            <Text Value="{Description}" Height="50" TextAlignment="Left" Alignment="Left" Margin="10,60" Dock="Top" TextWrapping="Wrap" />
+		                        </Panel>
+		                    </DockPanel>
+							<Clicked>
+								<Set nav.Active="page2" />
+							</Clicked>
+						</Each>
+
+		            </Grid>
+		        </ScrollView>
+
+
+				<WhileActive Threshold="0.5">
+					<Set shrinkIndicatorWidth.Value="false" />
+					<Set indicatorColorAttractor.Value="color0" />
+					<Set bgColorAttractor.Value="color0" />
+					<Set titleTextAttractor.Value="color0" />
+				</WhileActive>
+				<ActivatingAnimation>
+					<Change h1.Opacity="1" />
+					<Change col1.Width="2" />
+					<Change c1.Color="White" />
+				</ActivatingAnimation>
+			</Page>
+			<Page ux:Name="page2">
+				<StackPanel>
+					<Panel Height="250">
+				        <NativeViewHost>
+				        	<Select Data="{mapLocation}">
+				            <MapView Latitude="41.9964600" Longitude="21.4314100" Zoom="10" ShowMyLocationButton="True" >
+				                <Each Items="{trails}">
+				                	<Each Items="{Locations}">
+				                		<MapMarker Latitude="{lat}" Longitude="{lon}" Label="{Title}"/>
+				                	</Each>
+				                </Each>
+				            </MapView>
+				        </Select>
+				        </NativeViewHost>
+
+				</Panel>
+				<Panel Height="40">
+					<Text Value="{timeoutLocation}" />
+				</Panel>
+				<Panel Height="400">
+			        <ScrollView>
+			            <Grid ColumnCount="1">
+			            	
+			            	<Each Items="{trails}">
+			                    <StackPanel Height="300" Margin="10" Padding="10">
+			                        <Rectangle Layer="Background" CornerRadius="10" Fill="#fff"  />
+			                        <Rectangle Padding="-10" >
+			                        	<Image File="{LocalPhoto}" Height="200" /> 
+			                    	</Rectangle>
+			                            
+			                            <Text Value="{Title}" TextAlignment="Left" Alignment="Left" Dock="Top" FontSize="22" TextWrapping="Wrap" />
+
+			                            <Text Value="{Description}" TextAlignment="Left" Alignment="Left" TextWrapping="Wrap" />
+			                    </StackPanel>
+			                </Each>
+			            </Grid>
+
+			        </ScrollView>				
+
+					<WhileActive Threshold="0.5">
+						<Set shrinkIndicatorWidth.Value="true" />
+						<Set indicatorColorAttractor.Value="color1" />
+						<Set bgColorAttractor.Value="color1" />
+						<Set titleTextAttractor.Value="color1" />
+					</WhileActive>
+					<ActivatingAnimation>
+						<Change h2.Opacity="1" />
+						<Change col2.Width="2" />
+						<Change c2.Color="White" />
+					</ActivatingAnimation>
+				</Panel>
+			</StackPanel>
+			</Page>
+			<Page ux:Name="page3">
+				<PagePlaceholder File="Assets/screen3.png" />
+				<WhileActive Threshold="0.5">
+					<Set shrinkIndicatorWidth.Value="true" />
+					<Set indicatorColorAttractor.Value="color2" />
+					<Set bgColorAttractor.Value="color2" />
+					<Set titleTextAttractor.Value="color2" />
+				</WhileActive>
+				<ActivatingAnimation>
+					<Change h3.Opacity="1" />
+					<Change col3.Width="2" />
+					<Change c3.Color="White" />
+				</ActivatingAnimation>
+			</Page>
+			<Page ux:Name="page4">
+				<PagePlaceholder File="Assets/screen4.png" />
+				<WhileActive Threshold="0.5">
+					<Set shrinkIndicatorWidth.Value="false" />
+					<Set indicatorColorAttractor.Value="color3" />
+					<Set bgColorAttractor.Value="color3" />
+					<Set titleTextAttractor.Value="color3" />
+				</WhileActive>
+				<ActivatingAnimation Scale="0.333">
+					<Move Target="indicator" X="1" RelativeTo="PositionOffset" RelativeNode="p4"/>
+				</ActivatingAnimation>
+				<ActivatingAnimation>
+					<Change h4.Opacity="1" />
+					<Change col4.Width="2" />
+					<Change c4.Color="White" />
+				</ActivatingAnimation>
+			</Page>
+		</PageControl>
+	</ClientPanel>
+</App>
