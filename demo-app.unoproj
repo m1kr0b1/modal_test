@@ -8,7 +8,8 @@
   ],
   "Includes": [
     "*",
-    "Modules/*.js:Bundle"
+    "Modules/*.js:Bundle",
+    "Assets/*.png:Bundle"
   ],
   "Projects": [
     
