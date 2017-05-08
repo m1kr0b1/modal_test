@@ -58,7 +58,7 @@
 				var dist = distance(41.995876, 21.431812, observedLocation.value.latitude, observedLocation.value.longitude)
 				if ((dist < 50)){
 					// Display modal
-					isDialogShowing = true;
+					isDialogShowing.value = true;
 					console.log('check 1')
 					console.log(isDialogShowing);
 				}
@@ -74,7 +74,8 @@
             timeoutLocation: continuousLocation,
             mapLocation: mapLocation,
             hikes: hikes,
-            trails: trails
+            trails: trails,
+            isDialogShowing: isDialogShowing
         };
 
     </JavaScript>
